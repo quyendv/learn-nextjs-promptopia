@@ -3,7 +3,7 @@ import { connectDB } from '~/utils/database';
 import { ICreatePost } from '~/utils/types/prompt.type';
 
 export const POST = async (req: Request, res: Response) => {
-  const { userId, prompt, tag } = (await req.json()) as ICreatePost;
+  const { userId, prompt, tag } = (await req.json()) as ICreatePost; // body
 
   try {
     await connectDB();

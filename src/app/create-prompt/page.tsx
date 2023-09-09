@@ -10,7 +10,7 @@ import { SessionWithUser } from '../api/auth/[...nextauth]/route';
 
 export default function CreatePrompt() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session } = useSession() as { data: SessionWithUser | null /* ...others key */ };
 
   const [submitting, setSubmitting] = useState(false);
   const [post, setPost] = useState<IPost>({
@@ -28,7 +28,7 @@ export default function CreatePrompt() {
         body: JSON.stringify({
           prompt: post.prompt,
           tag: post.tag,
-          userId: (session as SessionWithUser).user.id,
+          userId: session?.user.id,
         } as ICreatePost),
       });
 
@@ -37,6 +37,8 @@ export default function CreatePrompt() {
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
