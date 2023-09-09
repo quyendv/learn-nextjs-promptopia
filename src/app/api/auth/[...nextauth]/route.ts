@@ -5,7 +5,7 @@ import UserModel, { UserDocument } from '~/models/user';
 import { connectDB } from '~/utils/database';
 import { removeVietnameseAccents } from '~/utils/helpers/transform.helper';
 
-type SessionWithUserId = Session & { user: { id?: string } };
+export type SessionWithUser = Session & { user: { id?: string } };
 
 const handler = NextAuth({
   providers: [
@@ -16,7 +16,7 @@ const handler = NextAuth({
     // NOTE: config provider google console: https://youtu.be/wm5gMKuwSYk?t=6219
   ],
   callbacks: {
-    async session({ session }): Promise<SessionWithUserId> {
+    async session({ session }): Promise<SessionWithUser> {
       // console.log({ session });
 
       // store the user id from MongoDB to session
@@ -24,7 +24,7 @@ const handler = NextAuth({
         email: session.user?.email,
       });
 
-      const sessionWithUserId = session as SessionWithUserId;
+      const sessionWithUserId = session as SessionWithUser;
       sessionWithUserId.user.id = sessionUser?._id.toString();
 
       return sessionWithUserId;

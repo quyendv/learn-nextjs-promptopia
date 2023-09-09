@@ -9,27 +9,30 @@ export interface IUser {
   deletedAt?: Date;
 }
 
-export type  UserDocument = HydratedDocument<IUser>;
+export type UserDocument = HydratedDocument<IUser>;
 
-export const UserSchema = new Schema<IUser>({
-  email: {
-    type: String,
-    // unique: [true, 'Email is already taken'], // WRONG SYNTAX
-    unique: true,
-    required: [true, 'Email is required'],
+export const UserSchema = new Schema<IUser>(
+  {
+    email: {
+      type: String,
+      // unique: [true, 'Email is already taken'], // WRONG SYNTAX
+      unique: true,
+      required: [true, 'Email is required'],
+    },
+    username: {
+      type: String,
+      required: [true, 'Username is required'],
+      match: [
+        /^(?=.{8,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/,
+        'Username invalid, it should contain 8-20 alphanumeric letters and be unique!',
+      ],
+    },
+    image: {
+      type: String,
+    },
   },
-  username: {
-    type: String,
-    required: [true, 'Username is required'],
-    match: [
-      /^(?=.{8,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/,
-      'Username invalid, it should contain 8-20 alphanumeric letters and be unique!',
-    ],
-  },
-  image: {
-    type: String,
-  },
-});
+  { timestamps: true },
+);
 
 // The "models" object is provided by the Mongoose Library and stores all the registered models.
 // If a model named "User" already exists in the "models" object, it assigns that existing model to the "User" variable.
