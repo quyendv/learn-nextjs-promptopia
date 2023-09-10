@@ -5,8 +5,8 @@ type Props = {
   name: string;
   desc: string;
   data: PromptDocument[];
-  handleEditPrompt?: Function;
-  handleDeletePrompt?: Function;
+  handleEditPrompt?: (post: PromptDocument) => void;
+  handleDeletePrompt?: (post: PromptDocument) => Promise<void>;
 };
 
 function Profile({ name, desc, data, handleEditPrompt, handleDeletePrompt }: Props) {

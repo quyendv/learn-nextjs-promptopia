@@ -1,12 +1,12 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { PromptDocument } from '~/models/prompt';
 import PromptCard from './PromptCard';
 
 type PromptListProps = {
   data: PromptDocument[];
-  handleTagClick: Function;
+  handleTagClick: (tag: string) => void;
 };
 
 const PromptCardList = ({ data, handleTagClick }: PromptListProps) => {
@@ -21,18 +21,44 @@ const PromptCardList = ({ data, handleTagClick }: PromptListProps) => {
 
 function Feed() {
   const [searchText, setSearchText] = useState('');
-  const [posts, setPosts] = useState([]);
-
-  const handleSearchChange = (e: FormEvent<HTMLInputElement>) => {};
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout>(); // for debounce, or using custom hooks like "tiktok-ui" project
+  const [posts, setPosts] = useState<PromptDocument[]>([]);
+  const [searchedPost, setSearchedPost] = useState<PromptDocument[]>([]); // filtered posts/prompts
 
   useEffect(() => {
     const fetchPosts = async () => {
       const response = await fetch('api/prompt');
-      const data = await response.json();
+      const data = (await response.json()) as PromptDocument[];
       setPosts(data);
     };
     fetchPosts();
   }, []);
+
+  const filterPrompt = (searchText: string): PromptDocument[] => {
+    const regex = new RegExp(searchText, 'i'); // 'i' flag for case-insensitive search
+    // filter by usernames, tags or prompt contents
+    return posts.filter(
+      (post) => regex.test(post.creator.username as string) || regex.test(post.tag) || regex.test(post.prompt),
+    );
+  };
+
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    clearTimeout(searchTimeout);
+    setSearchText(e.target.value);
+
+    // debounce
+    setSearchTimeout(
+      setTimeout(() => {
+        const searchResult = filterPrompt(e.target.value); // not using searchText because it is not updated now
+        setSearchedPost(searchResult);
+      }, 500),
+    );
+  };
+
+  const handleTagClick = (tagName: string): void => {
+    setSearchText(tagName);
+    setSearchedPost(filterPrompt(tagName));
+  };
 
   return (
     <section className="feed">
@@ -46,8 +72,7 @@ function Feed() {
           className="search_input"
         />
       </form>
-
-      <PromptCardList data={posts} handleTagClick={() => {}} />
+      <PromptCardList data={searchText ? searchedPost : posts} handleTagClick={handleTagClick} />
     </section>
   );
 }

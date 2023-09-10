@@ -1,13 +1,13 @@
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { MouseEventHandler, useState } from 'react';
 import { SessionWithUser } from '~/app/api/auth/[...nextauth]/route';
 import { PromptDocument } from '~/models/prompt';
 
 type Props = {
   post: PromptDocument;
-  handleTagClick?: Function;
+  handleTagClick?: (tag: string) => void;
   handleEditPrompt?: MouseEventHandler;
   handleDeletePrompt?: MouseEventHandler;
 };
@@ -15,6 +15,8 @@ type Props = {
 function PromptCard({ post, handleTagClick, handleEditPrompt, handleDeletePrompt }: Props) {
   const { data: session } = useSession() as { data: SessionWithUser | null /* ...others key */ };
   const pathName = usePathname();
+  const router = useRouter();
+
   const [copied, setCopied] = useState('');
 
   const handleCopy = (): void => {
@@ -26,9 +28,14 @@ function PromptCard({ post, handleTagClick, handleEditPrompt, handleDeletePrompt
     }
   };
 
+  const handleProfileClick = () => {
+    if (post.creator._id.toString() === session?.user.id?.toString()) return router.push('/profile');
+    router.push(`/profile/${post.creator._id.toString()}?name=${post.creator.username}`);
+  };
+
   return (
     <div className="prompt_card">
-      <div className="flex justify-start items-center gap-3 cursor-pointer">
+      <div className="flex justify-start items-center gap-3 cursor-pointer" onClick={handleProfileClick}>
         <Image
           src={post.creator?.image || ''}
           alt="user_image"
@@ -58,7 +65,10 @@ function PromptCard({ post, handleTagClick, handleEditPrompt, handleDeletePrompt
       </div>
 
       <p className="my-4 font-satoshi text-sm text-gray-700">{post.prompt}</p>
-      <p className="font-inter text-sm blue_gradient cursor-pointer" onClick={() => handleTagClick && handleTagClick}>
+      <p
+        className="font-inter text-sm blue_gradient cursor-pointer"
+        onClick={() => handleTagClick && handleTagClick(post.tag)}
+      >
         {post.tag}
       </p>
 

@@ -7,16 +7,16 @@ import Profile from '~/components/Profile';
 import { PromptDocument } from '~/models/prompt';
 import { SessionWithUser } from '../api/auth/[...nextauth]/route';
 
-export default function ProfilePage() {
+export default function MyProfile() {
   const { data: session } = useSession() as { data: SessionWithUser | null /* ...others key */ };
   const [posts, setPosts] = useState<PromptDocument[]>([]);
   const router = useRouter();
 
-  const handleEditPrompt = (post: PromptDocument) => {
+  const handleEditPrompt = (post: PromptDocument): void => {
     router.push(`/update-prompt?id=${post._id}`);
   };
 
-  const handleDeletePrompt = async (post: PromptDocument) => {
+  const handleDeletePrompt = async (post: PromptDocument): Promise<void> => {
     const hasConfirmed = confirm('Are you sure you want to delete this prompt?');
 
     if (hasConfirmed) {
